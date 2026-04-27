@@ -1,18 +1,12 @@
 #include <mpi.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
+#include "../include/quicksort_common.h"
 
-#define SIZE 10000000
+#define SIZE DEFAULT_ARRAY_SIZE
 
 // gcc -I"D:\MSMPI\Include" MpiQuickSort.c -L "D:\MSMPI\Lib\x64" -lmsmpi -o MpiQuickSort.exe
 // mpiexec -n 2 MpiQuickSort.exe
 
-void swap(int *a, int *b) {
-    int temp = *a;
-    *a = *b;
-    *b = temp;
-}
+
 
 void quicksort(int *arr, int left, int right) {
     if (left < right) {
@@ -56,6 +50,7 @@ int main(int argc, char *argv[]) {
     int *counts = NULL;
     int *displs = NULL;
     int local_n;
+    int array_size = SIZE;
 
     double start_time, end_time;
 
@@ -63,20 +58,31 @@ int main(int argc, char *argv[]) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-    // Tính toán chia mảng đều cho các tiến trình (dùng Scatterv)
+    // Parse command line arguments (only on rank 0)
     if (rank == 0) {
-        data = (int *)malloc(SIZE * sizeof(int));
-        srand(time(NULL));
-        for (int i = 0; i < SIZE; i++) {
-            data[i] = rand();
-        }
+        BenchmarkConfig config = parse_arguments(argc, argv);
+        array_size = config.array_size;
+        
+        printf("MPI QuickSort Benchmark\n");
+        printf("Array size: %d elements\n", array_size);
+        printf("Number of processes: %d\n", size);
+        printf("Number of runs: %d\n\n", config.num_runs);
+    }
+
+    // Broadcast array size to all processes
+    MPI_Bcast(&array_size, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    // Calculate data distribution
+    if (rank == 0) {
+        data = allocate_array(array_size);
+        generate_random_array(data, array_size);
 
         counts = (int *)malloc(size * sizeof(int));
         displs = (int *)malloc(size * sizeof(int));
-        int rem = SIZE % size;
+        int rem = array_size % size;
         int sum = 0;
         for (int i = 0; i < size; i++) {
-            counts[i] = SIZE / size + (i < rem ? 1 : 0);
+            counts[i] = array_size / size + (i < rem ? 1 : 0);
             displs[i] = sum;
             sum += counts[i];
         }
@@ -95,13 +101,13 @@ int main(int argc, char *argv[]) {
         displs = (int *)malloc(size * sizeof(int));
     MPI_Bcast(displs, size, MPI_INT, 0, MPI_COMM_WORLD);
 
-    // Gửi dữ liệu tới các tiến trình
+    // Distribute data to all processes
     MPI_Scatterv(data, counts, displs, MPI_INT, local_data, local_n, MPI_INT, 0, MPI_COMM_WORLD);
 
-    // Quick sort cục bộ
+    // Local quicksort
     quicksort(local_data, 0, local_n - 1);
 
-    // Ghép từng bước
+    // Merge results step by step
     int step = 1;
     while (step < size) {
         if (rank % (2 * step) == 0) {
@@ -130,7 +136,16 @@ int main(int argc, char *argv[]) {
 
     if (rank == 0) {
         end_time = MPI_Wtime();
-        printf("MPI Quick Sort completed in %.3f seconds with %d processes.\n", end_time - start_time, size);
+        
+        // Verify result
+        if (!verify_sorted(local_data, local_n, 1)) {
+            printf("Error: Sort failed verification!\n");
+        } else {
+            printf("Results:\n");
+            printf("Time: %.6f seconds\n", end_time - start_time);
+            printf("Throughput: %.2f M elements/second\n", array_size / ((end_time - start_time) * 1000000));
+        }
+
         free(data);
         free(counts);
         free(displs);
