@@ -1,9 +1,7 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include "../include/quicksort_common.h"
 #include <pthread.h>
-#include <time.h>
 
-#define N 10000000
+#define N DEFAULT_ARRAY_SIZE
 
 typedef struct {
     int *arr;
@@ -11,24 +9,7 @@ typedef struct {
     int right;
 } ThreadData;
 
-void swap(int *a, int *b) {
-    int t = *a;
-    *a = *b;
-    *b = t;
-}
 
-int partition(int arr[], int left, int right) {
-    int pivot = arr[right];
-    int i = left - 1;
-    for (int j = left; j < right; j++) {
-        if (arr[j] < pivot) {
-            i++;
-            swap(&arr[i], &arr[j]);
-        }
-    }
-    swap(&arr[i + 1], &arr[right]);
-    return i + 1;
-}
 
 void quicksort(int arr[], int left, int right) {
     if (left < right) {
@@ -75,70 +56,82 @@ void merge(int *arr, int left, int mid, int right) {
     free(R);
 }
 
-int main() {
-    int P;
-    printf("Nhap so luong thread (2, 4, 6, 8, 10, 12): ");
-    scanf("%d", &P);
-
-    if (P < 1 || P > N)
-    {
-        printf("So thread khong hop le.\n");
+int main(int argc, char* argv[]) {
+    BenchmarkConfig config = parse_arguments(argc, argv);
+    
+    if (config.num_threads < 1 || config.num_threads > MAX_THREADS) {
+        printf("Error: Number of threads should be between %d and %d\n", MIN_THREADS, MAX_THREADS);
         return 1;
     }
 
-    int *arr = malloc(N * sizeof(int));
-    if (!arr) {
-        printf("Khong cap phat duoc bo nho!\n");
-        return 1;
-    }
+    int* arr = allocate_array(config.array_size);
+    
+    printf("Pthreads QuickSort Benchmark\n");
+    printf("Array size: %d elements\n", config.array_size);
+    printf("Number of threads: %d\n", config.num_threads);
+    printf("Number of runs: %d\n\n", config.num_runs);
 
-    srand((unsigned int)time(NULL));
-    for (int i = 0; i < N; i++) {
-        arr[i] = rand() % 1000000;
-    }
+    pthread_t threads[MAX_THREADS];
+    ThreadData td[MAX_THREADS];
+    int chunk = config.array_size / config.num_threads;
 
-    pthread_t threads[P];
-    ThreadData td[P];
-    int chunk = N / P;
+    double total_time = 0.0;
+    Timer timer;
 
-    clock_t start_parallel = clock();
+    for (int run = 0; run < config.num_runs; run++) {
+        generate_random_array(arr, config.array_size);
 
-    // Tạo các luồng sắp xếp độc lập
-    for (int i = 0; i < P; i++) {
-        td[i].arr = arr;
-        td[i].left = i * chunk;
-        td[i].right = (i == P - 1) ? (N - 1) : ((i + 1) * chunk - 1);
-        pthread_create(&threads[i], NULL, threaded_quicksort, &td[i]);
-    }
+        timer_start(&timer);
 
-    for (int i = 0; i < P; i++) {
-        pthread_join(threads[i], NULL);
-    }
-
-    // Gộp dần từng đoạn đã sắp xếp
-    int current_chunk = chunk;
-    while (current_chunk < N) {
-        for (int i = 0; i < N; i += 2 * current_chunk) {
-            int mid = i + current_chunk - 1;
-            int right = ((i + 2 * current_chunk - 1) < N) ? (i + 2 * current_chunk - 1) : (N - 1);
-            if (mid < right)
-                merge(arr, i, mid, right);
+        // Create threads for parallel sorting
+        for (int i = 0; i < config.num_threads; i++) {
+            td[i].arr = arr;
+            td[i].left = i * chunk;
+            td[i].right = (i == config.num_threads - 1) ? (config.array_size - 1) : ((i + 1) * chunk - 1);
+            pthread_create(&threads[i], NULL, threaded_quicksort, &td[i]);
         }
-        current_chunk *= 2;
-    }
 
-    clock_t end_parallel = clock();
-    double time_parallel = (double)(end_parallel - start_parallel) / CLOCKS_PER_SEC;
+        // Wait for all threads to complete
+        for (int i = 0; i < config.num_threads; i++) {
+            pthread_join(threads[i], NULL);
+        }
 
-    printf("Thoi gian sap xep bang pthreads (N = %d, P = %d): %.6f giay\n", N, P, time_parallel);
+        // Merge sorted chunks
+        int current_chunk = chunk;
+        while (current_chunk < config.array_size) {
+            for (int i = 0; i < config.array_size; i += 2 * current_chunk) {
+                int mid = i + current_chunk - 1;
+                int right = ((i + 2 * current_chunk - 1) < config.array_size) ? 
+                           (i + 2 * current_chunk - 1) : (config.array_size - 1);
+                if (mid < right)
+                    merge(arr, i, mid, right);
+            }
+            current_chunk *= 2;
+        }
 
-    // Kiểm tra mảng đã sắp đúng
-    for (int i = 1; i < N; i++) {
-        if (arr[i - 1] > arr[i]) {
-            printf("Loi: Mang chua duoc sap xep dung tai vi tri %d\n", i - 1);
-            break;
+        timer_end(&timer);
+        double elapsed = get_elapsed_time(&timer);
+        total_time += elapsed;
+
+        if (config.verify_result && !verify_sorted(arr, config.array_size, 1)) {
+            printf("Error: Sort failed verification on run %d!\n", run + 1);
+            return 1;
+        }
+
+        if (config.num_runs > 1) {
+            printf("Run %d: %.6f seconds\n", run + 1, elapsed);
         }
     }
-    free(arr);
+
+    double avg_time = total_time / config.num_runs;
+    printf("\nResults:\n");
+    printf("Average time: %.6f seconds\n", avg_time);
+    printf("Throughput: %.2f M elements/second\n", config.array_size / (avg_time * 1000000));
+
+    if (config.output_csv) {
+        save_benchmark_csv(config.output_file, "Pthreads", config.array_size, config.num_threads, avg_time, 0.0);
+    }
+
+    free_array(arr);
     return 0;
 }
