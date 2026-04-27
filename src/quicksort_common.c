@@ -27,13 +27,13 @@ void generate_random_array(int arr[], int n) {
     }
 }
 
-void copy_array(int src[], int dest[], int n) {
+void copy_array(const int src[], int dest[], int n) {
     for (int i = 0; i < n; i++) {
         dest[i] = src[i];
     }
 }
 
-int verify_sorted(int arr[], int n, int ascending) {
+int verify_sorted(const int arr[], int n, int ascending) {
     for (int i = 1; i < n; i++) {
         if (ascending) {
             if (arr[i - 1] > arr[i]) {
@@ -50,17 +50,6 @@ int verify_sorted(int arr[], int n, int ascending) {
     return 1;
 }
 
-void print_array(int arr[], int n, int max_print) {
-    int limit = (n < max_print) ? n : max_print;
-    printf("Array: ");
-    for (int i = 0; i < limit; i++) {
-        printf("%d ", arr[i]);
-    }
-    if (n > max_print) {
-        printf("... (%d more elements)", n - max_print);
-    }
-    printf("\n");
-}
 
 void timer_start(Timer* timer) {
     struct timeval tv;
@@ -75,21 +64,11 @@ void timer_end(Timer* timer) {
     timer->elapsed_time = timer->end_time - timer->start_time;
 }
 
-double get_elapsed_time(Timer* timer) {
+double get_elapsed_time(const Timer* timer) {
     return timer->elapsed_time;
 }
 
-void print_benchmark_header(void) {
-    printf("=================================================================\n");
-    printf("                QuickSort Parallel Benchmark Suite\n");
-    printf("=================================================================\n");
-    printf("%-15s %-12s %-8s %-12s %-10s\n", "Algorithm", "Array Size", "Threads", "Time (s)", "Speedup");
-    printf("-----------------------------------------------------------------\n");
-}
 
-void print_benchmark_result(const char* algorithm, int array_size, int threads, double time, double speedup) {
-    printf("%-15s %-12d %-8d %-12.6f %-10.2fx\n", algorithm, array_size, threads, time, speedup);
-}
 
 void save_benchmark_csv(const char* filename, const char* algorithm, int array_size, int threads, double time, double speedup) {
     FILE* file = fopen(filename, "a");

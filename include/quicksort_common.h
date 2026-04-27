@@ -34,18 +34,16 @@ typedef struct {
 void swap(int* a, int* b);
 int partition(int arr[], int left, int right);
 void generate_random_array(int arr[], int n);
-void copy_array(int src[], int dest[], int n);
-int verify_sorted(int arr[], int n, int ascending);
-void print_array(int arr[], int n, int max_print);
+void copy_array(const int src[], int dest[], int n);
+int verify_sorted(const int arr[], int n, int ascending);
 
 // Timing functions
 void timer_start(Timer* timer);
 void timer_end(Timer* timer);
-double get_elapsed_time(Timer* timer);
+double get_elapsed_time(const Timer* timer);
 
 // Benchmark utilities
-void print_benchmark_header(void);
-void print_benchmark_result(const char* algorithm, int array_size, int threads, double time, double speedup);
+
 void save_benchmark_csv(const char* filename, const char* algorithm, int array_size, int threads, double time, double speedup);
 
 // Memory utilities

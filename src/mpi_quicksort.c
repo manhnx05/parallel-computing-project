@@ -25,7 +25,7 @@ void quicksort(int *arr, int left, int right) {
     }
 }
 
-void merge(int *a, int *b, int n, int m, int *result) {
+void merge(const int *a, const int *b, int n, int m, int *result) {
     int i = 0, j = 0, k = 0;
     while (i < n && j < m) {
         if (a[i] <= b[j]) {
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
     int local_n;
     int array_size = SIZE;
 
-    double start_time, end_time;
+    double start_time;
 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -135,7 +135,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (rank == 0) {
-        end_time = MPI_Wtime();
+        double end_time = MPI_Wtime();
         
         // Verify result
         if (!verify_sorted(local_data, local_n, 1)) {
