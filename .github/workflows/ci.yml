@@ -34,6 +34,15 @@ jobs:
       run: |
         brew install gcc open-mpi
         
+    - name: Debug file content
+      run: |
+        echo "=== Checking sequential_quicksort.c content ==="
+        grep -n "void generate_random_array\|void copy_array" src/sequential_quicksort.c || echo "No duplicate functions found"
+        echo "=== File size and modification time ==="
+        ls -la src/sequential_quicksort.c
+        echo "=== Last few lines of the file ==="
+        tail -20 src/sequential_quicksort.c
+    
     - name: Clean and build project
       run: |
         rm -rf bin/ obj/ || true
