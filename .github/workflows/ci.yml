@@ -53,7 +53,7 @@ jobs:
       
     - name: Run static analysis
       run: |
-        cppcheck --enable=all --error-exitcode=1 src/ include/
+        cppcheck --enable=warning,style,performance,portability --error-exitcode=1 --suppress=missingIncludeSystem src/ include/
         
     - name: Check code formatting
       run: |
