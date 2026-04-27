@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
     int local_n;
     int array_size = SIZE;
 
-    double start_time;
+    double start_time = 0.0;  // Initialize to avoid warning
 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
