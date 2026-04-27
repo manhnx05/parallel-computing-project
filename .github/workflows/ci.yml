@@ -52,6 +52,18 @@ jobs:
     - name: Make scripts executable
       run: chmod +x scripts/*.sh
     
+    - name: Debug build environment
+      run: |
+        echo "=== Environment Variables ==="
+        echo "CC: $CC"
+        echo "LIBOMP_INCLUDE: $LIBOMP_INCLUDE"
+        echo "LIBOMP_LIB: $LIBOMP_LIB"
+        echo "=== Makefile Variables ==="
+        make -n openmp 2>/dev/null | head -10 || echo "Make debug failed"
+        echo "=== Homebrew libomp info ==="
+        brew --prefix libomp || echo "Homebrew prefix failed"
+        ls -la $(brew --prefix libomp)/lib/ || echo "Library listing failed"
+    
     - name: Clean and build project
       run: |
         rm -rf bin/ obj/ || true
