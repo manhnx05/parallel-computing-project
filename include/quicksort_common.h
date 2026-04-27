@@ -31,27 +31,27 @@ typedef struct {
 } Timer;
 
 // Common function prototypes
-extern void swap(int* a, int* b);
-extern int partition(int arr[], int left, int right);
-extern void generate_random_array(int arr[], int n);
-extern void copy_array(const int src[], int dest[], int n);
-extern int verify_sorted(const int arr[], int n, int ascending);
+void swap(int* a, int* b);
+int partition(int arr[], int left, int right);
+void generate_random_array(int arr[], int n);
+void copy_array(const int src[], int dest[], int n);
+int verify_sorted(const int arr[], int n, int ascending);
 
 // Timing functions
-extern void timer_start(Timer* timer);
-extern void timer_end(Timer* timer);
-extern double get_elapsed_time(const Timer* timer);
+void timer_start(Timer* timer);
+void timer_end(Timer* timer);
+double get_elapsed_time(const Timer* timer);
 
 // Benchmark utilities
 
-extern void save_benchmark_csv(const char* filename, const char* algorithm, int array_size, int threads, double time, double speedup);
+void save_benchmark_csv(const char* filename, const char* algorithm, int array_size, int threads, double time, double speedup);
 
 // Memory utilities
-extern int* allocate_array(int size);
-extern void free_array(int* arr);
+int* allocate_array(int size);
+void free_array(int* arr);
 
 // Configuration parsing
-extern BenchmarkConfig parse_arguments(int argc, char* argv[]);
-extern void print_usage(const char* program_name);
+BenchmarkConfig parse_arguments(int argc, char* argv[]);
+void print_usage(const char* program_name);
 
 #endif // QUICKSORT_COMMON_H
