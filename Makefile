@@ -4,7 +4,21 @@
 CC = gcc
 MPICC = mpicc
 CFLAGS = -Wall -Wextra -O3 -std=c99
-OMPFLAGS = -fopenmp
+
+# Platform-specific OpenMP flags
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+    # macOS - use libomp
+    OMPFLAGS = -Xpreprocessor -fopenmp -lomp
+    # Ensure we use gcc, not clang
+    ifeq ($(CC),cc)
+        CC = gcc-14
+    endif
+else
+    # Linux - standard OpenMP
+    OMPFLAGS = -fopenmp
+endif
+
 PTHREADFLAGS = -lpthread
 MPIFLAGS = 
 

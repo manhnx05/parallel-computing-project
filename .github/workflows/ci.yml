@@ -32,7 +32,9 @@ jobs:
     - name: Install dependencies (macOS)
       if: matrix.os == 'macos-latest'
       run: |
-        brew install gcc open-mpi
+        brew install gcc open-mpi libomp
+        echo "CC=gcc-14" >> $GITHUB_ENV
+        echo "MPICC=mpicc" >> $GITHUB_ENV
         
     - name: Debug file content
       run: |
