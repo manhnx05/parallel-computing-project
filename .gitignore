@@ -1,0 +1,69 @@
+# Compiled binaries
+*.exe
+*.out
+*.o
+*.obj
+*.so
+*.dll
+*.dylib
+
+# Build directories
+build/
+bin/
+obj/
+dist/
+
+# IDE files
+.vscode/
+.vs/
+*.vcxproj*
+*.sln
+*.suo
+*.user
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*~
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Test results
+results/
+*.csv
+*.json
+benchmark_results_*
+
+# Memory debugging
+*.dSYM/
+vgcore.*
+core.*
+
+# Profiling
+gmon.out
+*.gcov
+*.gcda
+*.gcno
+
+# MPI temporary files
+*.mpirun*
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
+
+# Backup files
+*.bak
+*.backup
+*~
