@@ -43,6 +43,9 @@ jobs:
         echo "=== Last few lines of the file ==="
         tail -20 src/sequential_quicksort.c
     
+    - name: Make scripts executable
+      run: chmod +x scripts/*.sh
+    
     - name: Clean and build project
       run: |
         rm -rf bin/ obj/ || true
