@@ -11,10 +11,16 @@ ifeq ($(UNAME_S),Darwin)
     # macOS - use libomp
     ifdef LIBOMP_INCLUDE
         # Use environment variable if set (from CI)
-        OMPFLAGS = -Xpreprocessor -fopenmp -lomp -I$(LIBOMP_INCLUDE)
+        OMP_CFLAGS = -Xpreprocessor -fopenmp -I$(LIBOMP_INCLUDE)
+        ifdef LIBOMP_LIB
+            OMP_LDFLAGS = -lomp -L$(LIBOMP_LIB)
+        else
+            OMP_LDFLAGS = -lomp -L/opt/homebrew/opt/libomp/lib -L/usr/local/opt/libomp/lib
+        endif
     else
         # Fallback to common Homebrew locations
-        OMPFLAGS = -Xpreprocessor -fopenmp -lomp -I/usr/local/opt/libomp/include -I/opt/homebrew/opt/libomp/include
+        OMP_CFLAGS = -Xpreprocessor -fopenmp -I/usr/local/opt/libomp/include -I/opt/homebrew/opt/libomp/include
+        OMP_LDFLAGS = -lomp -L/usr/local/opt/libomp/lib -L/opt/homebrew/opt/libomp/lib
     endif
     # Ensure we use gcc, not clang
     ifeq ($(CC),cc)
@@ -22,7 +28,8 @@ ifeq ($(UNAME_S),Darwin)
     endif
 else
     # Linux - standard OpenMP
-    OMPFLAGS = -fopenmp
+    OMP_CFLAGS = -fopenmp
+    OMP_LDFLAGS = -fopenmp
 endif
 
 PTHREADFLAGS = -lpthread
@@ -80,10 +87,10 @@ $(SEQUENTIAL_BIN): $(SEQUENTIAL_OBJ) $(COMMON_OBJ)
 
 # OpenMP QuickSort
 $(OPENMP_OBJ): $(OPENMP_SRC) $(INCDIR)/quicksort_common.h
-	$(CC) $(CFLAGS) $(OMPFLAGS) $(INCLUDES) -c $< -o $@
+	$(CC) $(CFLAGS) $(OMP_CFLAGS) $(INCLUDES) -c $< -o $@
 
 $(OPENMP_BIN): $(OPENMP_OBJ) $(COMMON_OBJ)
-	$(CC) $(CFLAGS) $(OMPFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $^ $(OMP_LDFLAGS) -o $@
 
 # Pthreads QuickSort
 $(PTHREADS_OBJ): $(PTHREADS_SRC) $(INCDIR)/quicksort_common.h
