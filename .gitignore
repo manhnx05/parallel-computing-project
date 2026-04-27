@@ -60,7 +60,8 @@ gmon.out
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
-Makefile
+# Note: Keep our custom Makefile, only ignore CMake generated ones
+# Makefile (commented out to keep our custom Makefile)
 *.cmake
 
 # Backup files
