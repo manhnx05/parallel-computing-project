@@ -48,16 +48,6 @@ void quicksort_desc(int arr[], int left, int right) {
     }
 }
 
-void generate_random_array(int arr[], int n) {
-    for (int i = 0; i < n; i++)
-        arr[i] = rand();
-}
-
-void copy_array(const int src[], int dest[], int n) {
-    for (int i = 0; i < n; i++)
-        dest[i] = src[i];
-}
-
 int main(int argc, char* argv[]) {
     BenchmarkConfig config = parse_arguments(argc, argv);
     
