@@ -9,7 +9,13 @@ CFLAGS = -Wall -Wextra -O3 -std=c99
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
     # macOS - use libomp
-    OMPFLAGS = -Xpreprocessor -fopenmp -lomp
+    ifdef LIBOMP_INCLUDE
+        # Use environment variable if set (from CI)
+        OMPFLAGS = -Xpreprocessor -fopenmp -lomp -I$(LIBOMP_INCLUDE)
+    else
+        # Fallback to common Homebrew locations
+        OMPFLAGS = -Xpreprocessor -fopenmp -lomp -I/usr/local/opt/libomp/include -I/opt/homebrew/opt/libomp/include
+    endif
     # Ensure we use gcc, not clang
     ifeq ($(CC),cc)
         CC = gcc-14

@@ -35,6 +35,10 @@ jobs:
         brew install gcc open-mpi libomp
         echo "CC=gcc-14" >> $GITHUB_ENV
         echo "MPICC=mpicc" >> $GITHUB_ENV
+        # Set libomp path for both Intel and Apple Silicon Macs
+        LIBOMP_PREFIX=$(brew --prefix libomp)
+        echo "LIBOMP_INCLUDE=${LIBOMP_PREFIX}/include" >> $GITHUB_ENV
+        echo "LIBOMP_LIB=${LIBOMP_PREFIX}/lib" >> $GITHUB_ENV
         
     - name: Debug file content
       run: |
