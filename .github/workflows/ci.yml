@@ -8,10 +8,7 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
+    runs-on: ubuntu-latest
         
     steps:
     - uses: actions/checkout@v4
@@ -23,52 +20,13 @@ jobs:
         rm -rf bin/ obj/ results/ || true
         find . -name "*.o" -delete || true
     
-    - name: Install dependencies (Ubuntu)
-      if: matrix.os == 'ubuntu-latest'
+    - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential libopenmpi-dev
-        
-    - name: Install dependencies (macOS)
-      if: matrix.os == 'macos-latest'
-      run: |
-        brew install gcc open-mpi libomp
-        echo "CC=gcc-14" >> $GITHUB_ENV
-        echo "MPICC=mpicc" >> $GITHUB_ENV
-        # Don't set LIBOMP_INCLUDE to force fallback path usage
-        # LIBOMP_PREFIX=$(brew --prefix libomp)
-        # echo "LIBOMP_INCLUDE=${LIBOMP_PREFIX}/include" >> $GITHUB_ENV
-        # echo "LIBOMP_LIB=${LIBOMP_PREFIX}/lib" >> $GITHUB_ENV
-        echo "LDFLAGS=-L$(brew --prefix libomp)/lib" >> $GITHUB_ENV
-        echo "CPPFLAGS=-I$(brew --prefix libomp)/include" >> $GITHUB_ENV
-        
-    - name: Debug file content
-      run: |
-        echo "=== Checking sequential_quicksort.c content ==="
-        grep -n "void generate_random_array\|void copy_array" src/sequential_quicksort.c || echo "No duplicate functions found"
-        echo "=== File size and modification time ==="
-        ls -la src/sequential_quicksort.c
-        echo "=== Last few lines of the file ==="
-        tail -20 src/sequential_quicksort.c
     
     - name: Make scripts executable
       run: chmod +x scripts/*.sh
-    
-    - name: Debug build environment
-      run: |
-        echo "=== Environment Variables ==="
-        echo "CC: $CC"
-        echo "LIBOMP_INCLUDE: $LIBOMP_INCLUDE"
-        echo "LIBOMP_LIB: $LIBOMP_LIB"
-        echo "=== Homebrew libomp info ==="
-        brew --prefix libomp || echo "Homebrew prefix failed"
-        ls -la $(brew --prefix libomp)/lib/ 2>/dev/null || echo "Library listing failed"
-        echo "=== Test Makefile variables ==="
-        cd $GITHUB_WORKSPACE
-        make -f Makefile --dry-run openmp 2>/dev/null | head -5 || echo "Make dry-run failed"
-        echo "=== Unset LIBOMP vars to force fallback ==="
-        unset LIBOMP_INCLUDE
-        unset LIBOMP_LIB
     
     - name: Clean and build project
       run: |
@@ -85,7 +43,7 @@ jobs:
     - name: Upload benchmark results
       uses: actions/upload-artifact@v4
       with:
-        name: benchmark-results-${{ matrix.os }}
+        name: benchmark-results-ubuntu
         path: results/
         
   code-quality:
