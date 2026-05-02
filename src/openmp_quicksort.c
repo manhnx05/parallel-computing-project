@@ -1,5 +1,7 @@
 #include "../include/quicksort_common.h"
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 #define N DEFAULT_ARRAY_SIZE 
 
@@ -9,6 +11,7 @@ void quicksort_parallel(int arr[], int left, int right, int depth) {
     if (left < right) {
         int pi = partition(arr, left, right);
 
+#ifdef _OPENMP
         if (depth < 4) {
             #pragma omp task shared(arr)
             quicksort_parallel(arr, left, pi - 1, depth + 1);
@@ -21,6 +24,11 @@ void quicksort_parallel(int arr[], int left, int right, int depth) {
             quicksort_parallel(arr, left, pi - 1, depth + 1);
             quicksort_parallel(arr, pi + 1, right, depth + 1);
         }
+#else
+        // Sequential fallback
+        quicksort_parallel(arr, left, pi - 1, depth + 1);
+        quicksort_parallel(arr, pi + 1, right, depth + 1);
+#endif
     }
 }
 
@@ -35,7 +43,12 @@ int main(int argc, char* argv[]) {
     printf("Number of runs: %d\n\n", config.num_runs);
 
     generate_random_array(arr, config.array_size);
+    
+#ifdef _OPENMP
     omp_set_num_threads(config.num_threads);
+#else
+    printf("Warning: OpenMP not available, running sequentially\n");
+#endif
 
     double total_time = 0.0;
     Timer timer;
@@ -48,11 +61,16 @@ int main(int argc, char* argv[]) {
 
         timer_start(&timer);
 
+#ifdef _OPENMP
         #pragma omp parallel
         {
             #pragma omp single
             quicksort_parallel(arr, 0, config.array_size - 1, 0);
         }
+#else
+        // Fallback to sequential quicksort when OpenMP not available
+        quicksort_parallel(arr, 0, config.array_size - 1, 0);
+#endif
 
         timer_end(&timer);
         double elapsed = get_elapsed_time(&timer);

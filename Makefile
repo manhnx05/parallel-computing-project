@@ -8,18 +8,10 @@ CFLAGS = -Wall -Wextra -O3 -std=c99
 # Platform-specific OpenMP flags
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
-    # macOS - use libomp
-    ifdef LIBOMP_INCLUDE
-        # Use environment variable if set (from CI)
-        OMPFLAGS = -Xpreprocessor -fopenmp -lomp -I$(LIBOMP_INCLUDE) -L$(LIBOMP_INCLUDE)/../lib
-    else
-        # Fallback to common Homebrew locations
-        OMPFLAGS = -Xpreprocessor -fopenmp -lomp -I/opt/homebrew/opt/libomp/include -L/opt/homebrew/opt/libomp/lib -I/usr/local/opt/libomp/include -L/usr/local/opt/libomp/lib
-    endif
-    # Ensure we use gcc, not clang
-    ifeq ($(CC),cc)
-        CC = gcc-14
-    endif
+    # macOS - temporarily disable OpenMP due to linking issues
+    # Use sequential fallback for now
+    OMPFLAGS = 
+    $(warning "OpenMP disabled on macOS due to library linking issues")
 else
     # Linux - standard OpenMP
     OMPFLAGS = -fopenmp
