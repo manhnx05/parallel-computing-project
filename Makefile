@@ -9,28 +9,20 @@ CFLAGS = -Wall -Wextra -O3 -std=c99
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
     # macOS - use libomp
-    # Try to detect Homebrew prefix dynamically
-    HOMEBREW_PREFIX := $(shell brew --prefix 2>/dev/null || echo "/opt/homebrew")
-    LIBOMP_PREFIX := $(HOMEBREW_PREFIX)/opt/libomp
-    
-    # Check if environment variables are set (from CI)
     ifdef LIBOMP_INCLUDE
-        OMP_CFLAGS = -Xpreprocessor -fopenmp -I$(LIBOMP_INCLUDE)
-        OMP_LDFLAGS = -lomp -L$(LIBOMP_LIB)
+        # Use environment variable if set (from CI)
+        OMPFLAGS = -Xpreprocessor -fopenmp -lomp -I$(LIBOMP_INCLUDE) -L$(LIBOMP_LIB)
     else
-        # Use detected or fallback paths
-        OMP_CFLAGS = -Xpreprocessor -fopenmp -I$(LIBOMP_PREFIX)/include
-        OMP_LDFLAGS = -lomp -L$(LIBOMP_PREFIX)/lib
+        # Fallback to common Homebrew locations
+        OMPFLAGS = -Xpreprocessor -fopenmp -lomp -I/usr/local/opt/libomp/include -I/opt/homebrew/opt/libomp/include -L/usr/local/opt/libomp/lib -L/opt/homebrew/opt/libomp/lib
     endif
-    
     # Ensure we use gcc, not clang
     ifeq ($(CC),cc)
         CC = gcc-14
     endif
 else
     # Linux - standard OpenMP
-    OMP_CFLAGS = -fopenmp
-    OMP_LDFLAGS = -fopenmp
+    OMPFLAGS = -fopenmp
 endif
 
 PTHREADFLAGS = -lpthread
@@ -88,10 +80,10 @@ $(SEQUENTIAL_BIN): $(SEQUENTIAL_OBJ) $(COMMON_OBJ)
 
 # OpenMP QuickSort
 $(OPENMP_OBJ): $(OPENMP_SRC) $(INCDIR)/quicksort_common.h
-	$(CC) $(CFLAGS) $(OMP_CFLAGS) $(INCLUDES) -c $< -o $@
+	$(CC) $(CFLAGS) $(OMPFLAGS) $(INCLUDES) -c $< -o $@
 
 $(OPENMP_BIN): $(OPENMP_OBJ) $(COMMON_OBJ)
-	$(CC) $(CFLAGS) $^ $(OMP_LDFLAGS) -o $@
+	$(CC) $(CFLAGS) $(OMPFLAGS) $^ -o $@
 
 # Pthreads QuickSort
 $(PTHREADS_OBJ): $(PTHREADS_SRC) $(INCDIR)/quicksort_common.h
