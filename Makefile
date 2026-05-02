@@ -14,7 +14,7 @@ ifeq ($(UNAME_S),Darwin)
         OMPFLAGS = -Xpreprocessor -fopenmp -lomp -I$(LIBOMP_INCLUDE) -L$(LIBOMP_INCLUDE)/../lib
     else
         # Fallback to common Homebrew locations
-        OMPFLAGS = -Xpreprocessor -fopenmp -lomp -I/usr/local/opt/libomp/include -I/opt/homebrew/opt/libomp/include -L/usr/local/opt/libomp/lib -L/opt/homebrew/opt/libomp/lib
+        OMPFLAGS = -Xpreprocessor -fopenmp -lomp -I/opt/homebrew/opt/libomp/include -L/opt/homebrew/opt/libomp/lib -I/usr/local/opt/libomp/include -L/usr/local/opt/libomp/lib
     endif
     # Ensure we use gcc, not clang
     ifeq ($(CC),cc)
