@@ -11,7 +11,7 @@ ifeq ($(UNAME_S),Darwin)
     # macOS - use libomp
     ifdef LIBOMP_INCLUDE
         # Use environment variable if set (from CI)
-        OMPFLAGS = -Xpreprocessor -fopenmp -lomp -I$(LIBOMP_INCLUDE) -L$(LIBOMP_LIB)
+        OMPFLAGS = -Xpreprocessor -fopenmp -lomp -I$(LIBOMP_INCLUDE) -L$(LIBOMP_INCLUDE)/../lib
     else
         # Fallback to common Homebrew locations
         OMPFLAGS = -Xpreprocessor -fopenmp -lomp -I/usr/local/opt/libomp/include -I/opt/homebrew/opt/libomp/include -L/usr/local/opt/libomp/lib -L/opt/homebrew/opt/libomp/lib
