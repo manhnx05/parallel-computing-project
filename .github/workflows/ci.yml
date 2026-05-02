@@ -35,12 +35,12 @@ jobs:
         brew install gcc open-mpi libomp
         echo "CC=gcc-14" >> $GITHUB_ENV
         echo "MPICC=mpicc" >> $GITHUB_ENV
-        # Set libomp path for both Intel and Apple Silicon Macs
-        LIBOMP_PREFIX=$(brew --prefix libomp)
-        echo "LIBOMP_INCLUDE=${LIBOMP_PREFIX}/include" >> $GITHUB_ENV
-        echo "LIBOMP_LIB=${LIBOMP_PREFIX}/lib" >> $GITHUB_ENV
-        echo "LDFLAGS=-L${LIBOMP_PREFIX}/lib" >> $GITHUB_ENV
-        echo "CPPFLAGS=-I${LIBOMP_PREFIX}/include" >> $GITHUB_ENV
+        # Don't set LIBOMP_INCLUDE to force fallback path usage
+        # LIBOMP_PREFIX=$(brew --prefix libomp)
+        # echo "LIBOMP_INCLUDE=${LIBOMP_PREFIX}/include" >> $GITHUB_ENV
+        # echo "LIBOMP_LIB=${LIBOMP_PREFIX}/lib" >> $GITHUB_ENV
+        echo "LDFLAGS=-L$(brew --prefix libomp)/lib" >> $GITHUB_ENV
+        echo "CPPFLAGS=-I$(brew --prefix libomp)/include" >> $GITHUB_ENV
         
     - name: Debug file content
       run: |
@@ -63,11 +63,12 @@ jobs:
         echo "=== Homebrew libomp info ==="
         brew --prefix libomp || echo "Homebrew prefix failed"
         ls -la $(brew --prefix libomp)/lib/ 2>/dev/null || echo "Library listing failed"
-        echo "=== Makefile Variables Test ==="
+        echo "=== Test Makefile variables ==="
+        cd $GITHUB_WORKSPACE
         make -f Makefile --dry-run openmp 2>/dev/null | head -5 || echo "Make dry-run failed"
-        echo "=== Force set library path ==="
-        export LIBOMP_LIB=$(brew --prefix libomp)/lib
-        echo "LIBOMP_LIB set to: $LIBOMP_LIB"
+        echo "=== Unset LIBOMP vars to force fallback ==="
+        unset LIBOMP_INCLUDE
+        unset LIBOMP_LIB
     
     - name: Clean and build project
       run: |
