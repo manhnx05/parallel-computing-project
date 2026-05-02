@@ -2,7 +2,7 @@
 
 A comprehensive benchmark suite for comparing different parallel implementations of the QuickSort algorithm. This project provides implementations using Sequential, OpenMP, Pthreads, and MPI approaches with a unified benchmarking framework.
 
-## 🚀 Features
+## Features
 
 - **Multiple Parallel Implementations**: Sequential, OpenMP, Pthreads, and MPI
 - **Comprehensive Benchmarking**: Automated performance testing with configurable parameters
@@ -11,7 +11,7 @@ A comprehensive benchmark suite for comparing different parallel implementations
 - **Cross-Platform**: Works on Linux, macOS, and Windows (with appropriate toolchains)
 - **Configurable Testing**: Flexible array sizes, thread counts, and test iterations
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 ├── src/                    # Source code files
@@ -27,14 +27,13 @@ A comprehensive benchmark suite for comparing different parallel implementations
 │   └── run_tests.sh
 ├── tests/                  # Test files (future expansion)
 ├── results/                # Benchmark results (generated)
-├── docs/                   # Documentation
 ├── bin/                    # Compiled binaries (generated)
 ├── obj/                    # Object files (generated)
 ├── Makefile               # Build configuration
 └── README.md              # This file
 ```
 
-## 🛠️ Prerequisites
+## Prerequisites
 
 ### Required
 - **GCC**: C compiler with C99 support
@@ -68,7 +67,7 @@ brew install gcc open-mpi
 - Install MinGW-w64 or Visual Studio
 - Install Microsoft MPI for MPI support
 
-## 🔧 Building
+## Building
 
 ### Build All Implementations
 ```bash
@@ -89,7 +88,7 @@ make clean        # Remove build files
 make clean-all    # Remove build files and results
 ```
 
-## 🏃‍♂️ Running
+## Running
 
 ### Individual Algorithms
 
@@ -126,7 +125,7 @@ All implementations support these common options:
 **Thread-based implementations also support:**
 - `-t, --threads NUM`: Number of threads (default: 4)
 
-## 📊 Benchmarking
+## Benchmarking
 
 ### Run Complete Benchmark Suite
 ```bash
@@ -150,7 +149,7 @@ make benchmark-quick
 - `--runs NUM`: Number of runs per test
 - `--no-csv`: Don't output CSV results
 
-## 🧪 Testing
+## Testing
 
 ### Run Functionality Tests
 ```bash
@@ -159,7 +158,7 @@ make test
 
 This runs basic functionality tests to ensure all implementations work correctly.
 
-## 📈 Results Analysis
+## Results Analysis
 
 Benchmark results are saved in the `results/` directory with timestamps. Each CSV file contains:
 
@@ -179,7 +178,7 @@ ls -la results/
 cat results/benchmark_results_20240427_123456.csv
 ```
 
-## 🔍 Algorithm Details
+## Algorithm Details
 
 ### Sequential QuickSort
 - Classic divide-and-conquer implementation
@@ -201,7 +200,7 @@ cat results/benchmark_results_20240427_123456.csv
 - Process-based data distribution
 - Suitable for cluster computing
 
-## 🎯 Performance Tips
+## Performance Tips
 
 1. **Array Size**: Larger arrays show better parallel efficiency
 2. **Thread Count**: Optimal thread count usually matches CPU cores
@@ -209,7 +208,64 @@ cat results/benchmark_results_20240427_123456.csv
 4. **Memory**: Ensure sufficient RAM for large arrays
 5. **NUMA**: Consider NUMA topology for multi-socket systems
 
-## 🤝 Contributing
+## Performance Analysis
+
+### Key Metrics
+
+**Execution Time**: Wall-clock time to complete the sorting operation (seconds, lower is better)
+
+**Speedup**: Ratio of sequential time to parallel time
+- Formula: `Speedup = T_sequential / T_parallel`
+- Ideal: Linear speedup (speedup = number of threads/processes)
+
+**Efficiency**: Speedup per processing unit
+- Formula: `Efficiency = Speedup / Number_of_threads`
+- Range: 0 to 1 (100%)
+
+**Throughput**: Elements processed per second
+- Formula: `Throughput = Array_size / Execution_time`
+
+### Expected Performance Characteristics
+
+**Sequential QuickSort**: O(n log n) average, O(n²) worst case, baseline for speedup calculation
+
+**OpenMP QuickSort**: Near-linear speedup for large arrays, good scalability up to CPU cores, task creation overhead for small arrays
+
+**Pthreads QuickSort**: Similar to OpenMP but with manual thread management, merge overhead, higher memory usage
+
+**MPI QuickSort**: Significant communication overhead for small arrays, best scalability for very large arrays, network dependency
+
+### Factors Affecting Performance
+
+**Array Size**:
+- Small arrays (< 100K): Sequential often fastest due to overhead
+- Medium arrays (100K - 10M): Good parallel efficiency
+- Large arrays (> 10M): Best parallel speedup
+
+**Number of Threads/Processes**:
+- Optimal: Usually equals number of CPU cores
+- Over-subscription: Performance degradation beyond core count
+- Under-utilization: Poor resource usage with too few threads
+
+**System Characteristics**:
+- CPU Cores: More cores = better parallel potential
+- Memory Bandwidth: Critical for large arrays
+- Cache Size: Affects performance for medium arrays
+- NUMA Topology: Important for multi-socket systems
+
+### Benchmark Interpretation
+
+**Good Performance Indicators**:
+- Speedup > 0.8 × number_of_threads (80% efficiency)
+- Consistent performance across multiple runs
+- Performance scales with array size
+
+**Performance Issues**:
+- Speedup < 0.5 × number_of_threads (poor efficiency)
+- High variance between runs
+- Performance degradation with more threads
+
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -217,18 +273,18 @@ cat results/benchmark_results_20240427_123456.csv
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📝 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 📚 References
+## References
 
 - Hoare, C.A.R. (1962). "Quicksort". The Computer Journal. 5 (1): 10–16.
 - OpenMP Architecture Review Board. OpenMP Application Programming Interface.
 - IEEE Std 1003.1-2017 (POSIX.1-2017). IEEE Standard for Information Technology.
 - MPI Forum. MPI: A Message-Passing Interface Standard.
 
-## 🙋‍♂️ Support
+## Support
 
 If you encounter any issues or have questions:
 
@@ -236,7 +292,7 @@ If you encounter any issues or have questions:
 2. Create a new issue with detailed information
 3. Include system information and error messages
 
-## 📊 Benchmark Results Example
+## Example Benchmark Results
 
 | Algorithm  | Array Size | Threads | Time (s) | Speedup |
 |------------|------------|---------|----------|---------|
